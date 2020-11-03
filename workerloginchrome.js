@@ -65,18 +65,25 @@ let openbrowser = async (proxy,i) => {
     process.removeAllListeners();
     process.setMaxListeners(999999);
     console.log(proxy);
+    let prox = proxy.split(":");
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
        //executablePath: '/usr/bin/google-chrome',
        executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
         args: [
-            `--proxy-server=dynamic.ttproxy.com:10001`,
-            '--incognito',
-            '--disable-background-timer-throttling',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding',
+            `--proxy-server=${prox[0]}:${prox[1]}`,
             '--no-sandbox',
-          
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process', // <- this one doesn't works in Windows
+                '--disable-gpu',
+                '--incognito',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding'
 
         ]
     });
@@ -92,12 +99,12 @@ let openbrowser = async (proxy,i) => {
         deviceScaleFactor: 1,
     });
     console.log('set viewport');
-    await page.setUserAgent(ua[i]);
+    //await page.setUserAgent(ua[i]);
     console.log('set useragent');
-    //  await page.authenticate({
-    //        username: 'nich_1310@yahoo.com',
-    //        password: 'N!ch0l@5'
-    //    });
+     await page.authenticate({
+           username: 'metabbe3',
+           password: prox[3]
+       });
 
 
     //console.log('a');
@@ -234,9 +241,9 @@ let target = async (page) => {
        await page.waitFor(15000);
         await page.evaluate(() =>
             document.querySelector('video').pause());
-       // await page.waitFor(15000);
+        await page.waitFor(15000);
         console.log('video found try pause');
-        //await page.waitFor(15000);
+        await page.waitFor(15000);
         await page.evaluate(() =>
             document.querySelector('video').pause());
         console.log('video paused');
@@ -310,28 +317,15 @@ let loopTime = async (page) => {
 
 (async () => {
     try {
-        let proxy ;
+        
         let numstart = start * 1;
         for (let k = start; k < end; k++) {
             for (let i = 0; i < 1; i++) {
                 console.log(numstart);
                 const words = no.no[numstart].split(':');
                 const countlogin = 0;
-                await axios.get('https://api.ttproxy.com/v1/obtain', {
-    params: queries,
-}).then((response) => {
-    console.log('Response HTTP Status Code: ', response.status);
-    console.log('Response HTTP Response Body: ', response.data);
 
-    // Step 2 : Use proxy IP    
-   
-    proxy = response.data.data.proxies[0];
-
-}).catch((e) => {
-    console.error('Error:', e);
-});
-
-const page2 = await openbrowser(proxy,i);
+const page2 = await openbrowser(proxy.proxy[numstart],i);
 
 if (!fs.existsSync(`./cookies/cookies-${words[0]}.json`)) {
     console.log('dont exist');
